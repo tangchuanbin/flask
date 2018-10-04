@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href='./node_modules/bootstrap/dist/css/bootstrap.css'>
+	<link rel="stylesheet" href='css/main.css'>
+	<script src='./node_modules/jquery/dist/jquery.min.js'></script> 
+	<script src='./node_modules/bootstrap/dist/js/bootstrap.min.js'></script> 
+	<script src='./node_modules/masonry-layout/dist/masonry.pkgd.js'></script> 
+	<script src='./node_modules/imagesloaded/imagesloaded.pkgd.js'></script> 
+	<script src='./node_modules/lazyload/lazyload.js'></script> 
+	<script>
+		var page = 1;
+		function getQueryVariable(variable)
+		{
+		       var query = window.location.search.substring(1);
+		       var vars = query.split("&");
+		       for (var i=0;i<vars.length;i++) {
+		               var pair = vars[i].split("=");
+		               if(pair[0] == variable){return pair[1];}
+		       }
+		       return(false);
+		}
+		//设置滚动条高度
+		function setScrollTop(num) {
+			(document.documentElement && document.documentElement.scrollTop) ? (document.documentElement.scrollTop = num) : (document.body.scrollTop = num);
+		}
+		$(function(){
+			main_height = document.body.clientHeight - $('.bottom').outerHeight() - $('nav').outerHeight()
+			$('.main').height(main_height + 'px')
+			
+			var cate = getQueryVariable('cate')
+			console.log(cate)
+			if (cate == false) {
+				cate = 4
+			}
+
+			get_data(cate, page, 0)
+			
+			$('#load_more').click(function() {
+				page = page + 1
+				console.log(page)
+				get_data(cate, page)
+			})
+			$($('.form-inline')[0][1]).click(function(){
+				var cate = getQueryVariable('cate')
+				if (cate == false) {
+					cate = 4
+				}
+				page = 1
+				get_data(cate, page, 0)
+			})
+			allow_scroll = true
+			$(window).scroll(function() {
+				document_height = document.body.clientHeight 
+				//document_height = $(window).scrollHeight
+				document_height = $('.main')[0].scrollHeight
+				div_height = $(window).height()
+				div_scroll = $(window).scrollTop()
+				console.log(document_height + ',' + div_height + ',' + div_scroll)
+
+				if(document_height - div_height - div_scroll <  90){
+					if (allow_scroll) {
+						allow_scroll = false
+						page = page + 1;
+						console.log(page)
+						get_data(cate, page, 0)
+					}
+				}
+			})
+		})
+		
+		function change() {
+			var cate = getQueryVariable('cate')
+			console.log(cate)
+			if (cate == false) {
+				cate = 1
+			}
+			get_data(cate, page, 1)
+		}	
+
+		function get_data(cate, page, rand) {
+			var key_word = $('#search').val()
+			var condition = {}
+			if (key_word != '') {
+				condition = {'key_word': key_word}
+			}
+			var url = "http://47.104.164.88/api/list/" +cate + '/' +  page + '/' + rand
+			$.ajax({
+				url: url,
+				method: "get",
+				data: condition,
+				dataType: "json",
+				success: function(data) {
+					allow_scroll = true
+					page = data.page
+					dom = ''
+					style = ''
+					//$.each(data[0].my_url, function(i, v) {
+					//	dom += '<div class = "grid-item"><img src = "' + v + '"/></div>'
+					//})
+					$.each(data.list, function(i, v) {
+						//style = 'style= "width: ' + v.width + 'px;' + 'height:' + v.height + 'px;"'
+						height = $(document).width() * 0.2 * (v.height / v.width)
+						style = 'height=' + height + 'px'
+						dom += '<div class = "grid-item"><img '+ style + ' class="lazyload" src = "loading3.gif"  data-src = "' + v.my_url + '"/></div>'
+					})
+					
+					dom = $(dom)
+					var $grid = $('.grid').masonry({
+						itemSelector: '.grid-item',
+						horizontalOrder: false
+					})
+					if (rand == 1 || (key_word != '' && page == 1)) {
+						$('.grid-item').remove('.grid-item')
+					}
+					$grid.masonry().append(dom).masonry('appended', dom).masonry()
+					$grid = $('.grid').masonry({
+						itemSelector: '.grid-item',
+						horizontalOrder: false
+					})
+
+					$grid.imagesLoaded().progress( function() {
+					}).done(function() {
+						$('.lazyload').lazyload()
+						$grid.masonry('layout')
+						$grid.masonry();
+						$grid.masonry('reloadItems')
+						$grid.masonry();
+					}) 
+				},
+				fail: function(data) {
+					alert('fali')
+				}
+			});
+		}
+	</script>
+	<title>斗图之家-专业表情包搜素</title>
+</head>
+<body>
+	<nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light navheight">
+	<div class="container">
+	  <a class="navbar-brand" href="#">斗图之家</a>
+	  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+	    <span class="navbar-toggler-icon"></span>
+	  </button>
+	
+	  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+	    <ul class="navbar-nav mr-auto">
+	      <!-- <li class="nav-item active">
+	        <a class="nav-link" href="#">最新表情<span class="sr-only">(current)</span></a>
+	      </li> -->
+	      <!-- <li class="nav-item">
+	        <a class="nav-link" href="#">表情搜索</a>
+	      </li> -->
+	      <!-- <li class="nav-item dropdown">
+	        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+	        联系我们
+	        </a>
+	        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+	          <a class="dropdown-item" href="#">赞助我们</a>
+	          <a class="dropdown-item" href="#">关于我们</a>
+	          <a class="dropdown-item" href="#">其他</a>
+	        </div>
+	      </li> -->
+	    </ul>
+	    <form class="form-inline">
+	      <input class="form-control mr-sm-2" type="search" placeholder="输入关键词" id="search" aria-label="Search">
+	      <button class="btn btn-outline-default my-2 my-sm-0" type="button" >逗比一下</button>
+	    </form>
+	  </div>
+	</div>
+	</nav>
+	<div class='_container'>
+		<div class="container-fluid">
+			<div class="row">
+				<!-- <div class="col-sm-12 ads">baner</div> -->
+				<div class="left-nav">
+					<div class="nav flex-column nav-pills" aria-orientation="vertical">
+						<a class="nav-link active"  href="bq.html">最新表情</a>
+						<a class="nav-link"  href="#">表情搜索</a>
+						<a class="nav-link"  href="#">联系我们</a>
+						<a class="nav-link"  href="about.html">关于我们</a>
+					</div>
+				</div>
+				<div class="col-sm-10 main">
+					<div class="grid">
+					  <div class="grid-sizer"></div>
+					</div>
+				</div>
+				<div class="col-sm-2">
+					<div class="fixed">
+						<div class="card  bg-light mb-3" style="max-width: 18rem;">
+							<div class="card-header">24小时热门表情</div>
+							<div class="card-body">
+								<img src="http://ww2.sinaimg.cn/large/b184b84dly1fvqenmmcyej2069064mx9"/>
+								<img src="http://ww2.sinaimg.cn/large/b184b84dly1fvqent0q6fj20a00a0wf1"/>
+							</div>
+						</div>
+						<div class="bottom">图片源自网络</div>
+						<div>如有侵权请联系我们删除</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<html>
+	<title>test</title>
+	<p>test</p>
+	<style type="text/css">
+		.grid-item { 
+			width: 200px;  
+		}
+		.grid-item--width2 { 
+			width: 400px;  
+		}	
+	</style>
+	<script src='./node_modules/jquery/dist/jquery.min.js'></script> 
+	<script src='./node_modules/masonry-layout/dist/masonry.pkgd.min.js'></script> 
+	<script>
+		console.log($('.grid'))
+		$('.grid').masonry({
+			  // options
+			  itemSelector: '.grid-item',
+			  columnWidth: 200
+		});
+	</script>
+	<body>
+		<div class="grid">
+			  <div class="grid-item">...</div>
+			  <div class="grid-item grid-item--width2">...</div>
+			  <div class="grid-item">...</div>
+		</div>
+	</body>
+
+</html>
+	

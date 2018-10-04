@@ -1,0 +1,178 @@
+<html>
+	<title>遇见世界，发现美--Just Enjoy</title>
+	<style type="text/css">
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+		
+		/* force scrollbar */
+		
+		body {
+			font-family: sans-serif;
+			overflow: hidden;
+		}
+		.main {
+			background : #DDD;
+			height : 100%;
+			overflow:auto;
+			overflow-x: hidden;
+		}
+		
+		/* ---- grid ---- */
+		
+		.grid {
+		  background: #DDD;
+		}
+		
+		/* clear fix */
+		.grid:after {
+		  content: '';
+		  display: block;
+		  clear: both;
+		}
+		
+		/* ---- .grid-item ---- */
+		
+		.grid-sizer,
+		.grid-item {
+		  width: 20%;
+		}
+		
+		.grid-item {
+		  float: left;
+		}
+		.grid:after {
+		  content: '';
+		  display: block;
+		  clear: both;
+		}		
+		.grid-item:before {
+		  counter-increment: grid-item;
+		 /*  content: counter(grid-item); */
+		  display: block;
+		  color: white;
+		  padding-top: 0.2em;
+		  text-align: center;
+		  font-size: 1.4rem;
+		}
+		.grid-item img {
+		  display: block;
+		  width: 100%;
+		}
+		#load_more {
+
+			
+		}
+		.footer {
+			text-align: center;
+			margin-top: 80px;
+			padding-bottom:50px;
+		}
+		.bottom {
+			height: 50px;
+			background:#000;
+		}
+		
+		.site_foot {
+			z-index:2
+		}
+		.bottom-footer {
+			background-color: rgba(0, 0, 0, .85);
+			height: 80px;
+		}
+		
+	</style>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href='./node_modules/bootstrap/dist/css/bootstrap.min.css'>
+	<link rel="stylesheet" href='head.css'>
+	<script src='./node_modules/jquery/dist/jquery.min.js'></script> 
+	<script src='./node_modules/bootstrap/dist/js/bootstrap.min.js'></script> 
+	<script src='./node_modules/masonry-layout/dist/masonry.pkgd.js'></script> 
+	<script src='./node_modules/imagesloaded/imagesloaded.pkgd.js'></script> 
+	<script src='./node_modules/lazyload/lazyload.js'></script> 
+	<script>
+		page = 1;
+		function getQueryVariable(variable)
+		{
+		       var query = window.location.search.substring(1);
+		       var vars = query.split("&");
+		       for (var i=0;i<vars.length;i++) {
+		               var pair = vars[i].split("=");
+		               if(pair[0] == variable){return pair[1];}
+		       }
+		       return(false);
+		}
+		$(function(){
+			main_height = document.body.clientHeight - $('.bottom').outerHeight() - $('nav').outerHeight() - 1
+			$('.main').height(main_height + 'px')
+			
+			var cate = getQueryVariable('cate')
+			console.log(cate)
+			if (cate == false) {
+				cate = 1
+			}
+
+			get_data(cate, page)
+			
+			$('#load_more').click(function() {
+				page = page + 1
+				console.log(page)
+				get_data(cate, page)
+			})
+		})
+
+		function get_data(cate, page) {
+			var url = "http://47.104.164.88/api/list/" +cate + '/' +  page
+			$.ajax({
+				url: url,
+				method: "get",
+				data: {},
+				dataType: "json",
+				success: function(data) {
+					dom = ''
+					style = ''
+					//$.each(data[0].my_url, function(i, v) {
+					//	dom += '<div class = "grid-item"><img src = "' + v + '"/></div>'
+					//})
+					$.each(data, function(i, v) {
+						//style = 'style= "width: ' + v.width + 'px;' + 'height:' + v.height + 'px;"'
+						height = $(document).width() * 0.2 * (v.height / v.width)
+						style = 'height=' + height + 'px'
+						dom += '<div class = "grid-item"><img '+ style + ' class="lazyload" src = "loading.gif"  data-src = "' + v.my_url + '"/></div>'
+					})
+					
+					dom = $(dom)
+					var $grid = $('.grid').masonry({
+						itemSelector: '.grid-item',
+						horizontalOrder: false
+					})
+
+					$grid.masonry().append(dom).masonry('appended', dom).masonry()
+					$grid = $('.grid').masonry({
+						itemSelector: '.grid-item',
+						horizontalOrder: false
+					})
+
+					$grid.imagesLoaded().progress( function() {
+					}).done(function() {
+						$('.lazyload').lazyload()
+						$grid.masonry('layout')
+						$grid.masonry();
+						$grid.masonry('reloadItems')
+						$grid.masonry();
+					}) 
+					
+				},
+				fail: function(data) {
+					alert('fali')
+				}
+			});
+		}
+	</script>
+	<body>
+	</body> 
+
+</html>
+	

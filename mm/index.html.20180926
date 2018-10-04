@@ -1,0 +1,222 @@
+<html>
+	<title>遇见世界，发现美--Just Enjoy</title>
+	<style type="text/css">
+		* { box-sizing: border-box; }
+		
+		/* force scrollbar */
+		html { overflow-y: scroll; }
+		
+		body { font-family: sans-serif; }
+		.main {
+			background : #DDD
+			height : 100%;
+		}
+		
+		/* ---- grid ---- */
+		
+		.grid {
+		  background: #DDD;
+		}
+		
+		/* clear fix */
+		.grid:after {
+		  content: '';
+		  display: block;
+		  clear: both;
+		}
+		
+		/* ---- .grid-item ---- */
+		
+		.grid-sizer,
+		.grid-item {
+		  width: 20%;
+		}
+		
+		.grid-item {
+		  float: left;
+		}
+		.grid:after {
+		  content: '';
+		  display: block;
+		  clear: both;
+		}		
+		.grid-item:before {
+		  counter-increment: grid-item;
+		 /*  content: counter(grid-item); */
+		  display: block;
+		  color: white;
+		  padding-top: 0.2em;
+		  text-align: center;
+		  font-size: 1.4rem;
+		}
+		.grid-item img {
+		  display: block;
+		  width: 100%;
+		}
+		#load_more {
+
+			
+		}
+		.footer {
+			text-align: center;
+			margin-top: 80px;
+			padding-bottom:50px;
+		}
+		.bottom {
+			position: absolute;
+			z-index: 100;
+			bottom: 0;
+			left: 0;
+			width: 100%;
+			height: 48px;
+			background: #444;
+			padding: 0;
+			border-top: 1px solid #444;
+		}
+		.site_foot {
+			z-index:2
+		}
+		.bottom-footer {
+			background-color: rgba(0, 0, 0, .85);
+			height: 80px;
+		}
+		
+	</style>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href='./node_modules/bootstrap/dist/css/bootstrap.min.css'>
+	<link rel="stylesheet" href='head.css'>
+	<script src='./node_modules/jquery/dist/jquery.min.js'></script> 
+	<script src='./node_modules/bootstrap/dist/js/bootstrap.min.js'></script> 
+	<script src='./node_modules/masonry-layout/dist/masonry.pkgd.js'></script> 
+	<script src='./node_modules/imagesloaded/imagesloaded.pkgd.js'></script> 
+	<script src='./node_modules/lazyload/lazyload.js'></script> 
+	<script>
+		page = 1;
+		function getQueryVariable(variable)
+		{
+		       var query = window.location.search.substring(1);
+		       var vars = query.split("&");
+		       for (var i=0;i<vars.length;i++) {
+		               var pair = vars[i].split("=");
+		               if(pair[0] == variable){return pair[1];}
+		       }
+		       return(false);
+		}
+		$(function(){
+			var cate = getQueryVariable('cate')
+			console.log(cate)
+			if (cate == false) {
+				cate = 1
+			}
+
+			get_data(cate, page)
+
+			$('#load_more').click(function() {
+				page = page + 1
+				console.log(page)
+				get_data(cate, page)
+			})
+		})
+		//$(function () {
+		//    var LIST_ITEM_SIZE = 100;
+		//    //滚动条距底部的距离
+		//    var BOTTOM_OFFSET = 0;
+		//    $(document).ready(function () {
+		//        $(window).scroll(function () {
+		//            var $currentWindow = $(window);
+		//            //当前窗口的高度
+		//            var windowHeight = $currentWindow.height();
+		//            //console.log("current widow height is " + windowHeight);
+		//            //当前滚动条从上往下滚动的距离
+		//            var scrollTop = $currentWindow.scrollTop();
+		//            //console.log("current scrollOffset is " + scrollTop);
+		//            //当前文档的高度
+		//            var docHeight = $(document).height();
+		//            //console.log("current docHeight is " + docHeight);
+		// 
+		//            //当 滚动条距底部的距离 + 滚动条滚动的距离 >= 文档的高度 - 窗口的高度
+		//            //换句话说：（滚动条滚动的距离 + 窗口的高度 = 文档的高度）  这个是基本的公式
+		//            if ((BOTTOM_OFFSET + scrollTop) >= docHeight - windowHeight) {
+		//				console.log(page)
+		//				page = page + 1;
+		//				get_data(page)
+		//            }
+		//        });
+		//    });
+		//})
+
+		function get_data(cate, page) {
+			var url = "http://47.104.164.88/api/list/" +cate + '/' +  page
+			$.ajax({
+				url: url,
+				method: "get",
+				data: {},
+				dataType: "json",
+				success: function(data) {
+					dom = ''
+					//$.each(data[0].my_url, function(i, v) {
+					//	dom += '<div class = "grid-item"><img src = "' + v + '"/></div>'
+					//})
+					$.each(data, function(i, v) {
+						dom += '<div class = "grid-item"><img class="lazyload" src = "example.jpg" data-src = "' + v.my_url + '"/></div>'
+					})
+					
+					dom = $(dom)
+					var $grid = $('.grid').masonry({
+						itemSelector: '.grid-item',
+						horizontalOrder: false
+					})
+					$grid.masonry().append(dom).masonry('appended', dom).masonry()
+
+					$grid.imagesLoaded().progress( function() {
+						console.log(111)
+					}).done(function() {
+						console.log(222)
+						$grid.masonry('layout');
+						$('.lazyload').lazyload()
+						$grid.masonry('reloadItems')
+					}) 
+				},
+				fail: function(data) {
+					alert('fali')
+				}
+			});
+		}
+	
+
+	</script>
+	<body>
+		<nav class="site-header sticky-top py-1">
+			<div class="container d-flex flex-column flex-md-row justify-content-between">
+			    <a class="py-2" href="http://47.104.164.88">
+					<img src="just_enjoy4.png" style="width:108px"/>
+    		    </a>
+    		    <a class="py-2 d-none d-md-inline-block" href="http://47.104.164.88/index.html?cate=1">美女</a>
+    		    <a class="py-2 d-none d-md-inline-block" href="http://47.104.164.88/index.html?cate=2">汽车&生活</a>
+    		    <a class="py-2 d-none d-md-inline-block" href="http://47.104.164.88/index.html?cate=3">自然</a>
+    		    <a class="py-2 d-none d-md-inline-block" href="#">社会</a>
+    		    <a class="py-2 d-none d-md-inline-block" href="#">风景</a>
+    		    <a class="py-2 d-none d-md-inline-block" href="#">太空</a>
+    		    <a class="py-2 d-none d-md-inline-block" href="#">自驾</a>
+    	    </div>
+		</nav>
+		<div class='main'>
+			<div class="grid">
+			  <div class="grid-sizer"></div>
+			  <!--<div class="grid-item">
+			    <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/82/orange-tree.jpg" />
+			  </div>-->
+			</div>
+			<div class='footer'>
+				<input class="btn btn-primary" id="load_more" type="button" value="加载更多">
+			</div>
+		</div>
+		<!-- <div class="bottom-footer"></div> -->
+		<!-- <nav class="navbar fixed-bottom site-header site-foot">
+			<a class="navbar-brand" href="#">Fixed bottom</a>
+		</nav> -->
+		<!-- <div class="bottom"></div> -->
+	</body>
+
+</html>
+	

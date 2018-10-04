@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<script src='./node_modules/jquery/dist/jquery.min.js'></script> 
+	<script>
+		$(function(){
+		  var $list = $('.list');
+		  var htmlNodes = '';
+		  $(window).scroll(function(){
+			allow_scroll = true
+		    // 为了体验更好，在滚动到顶部之前50px(这个值也可以是其他的，按需求来)的位置时执行关键操作
+		    if($(document).height() - $(window).height() - $(window).scrollTop() > 50){
+				if (allow_scroll) {
+					allow_scroll = false
+					 $list.append('<div class="loading">加载中...</div>')
+		   			   // 用定时器模拟ajax请求的异步操作
+		   			   setTimeout(function(){
+		   			     $('.loading').remove();
+		   			     htmlNodes = '<li>append这是一条新闻</li>';
+		   			     $list.append(htmlNodes);
+						 allow_scroll = true
+		   			   }, 1000);
+				}
+			}});
+		});
+		$(function() {
+			//获取滚动条高度
+			function getScrollTop() {
+				var scrollTop = 0;
+				scrollTop = (document.body.scrollTop > document.documentElement.scrollTop) ? document.body.scrollTop : document.documentElement.scrollTop;
+				return scrollTop;
+			}
+
+		})
+
+		
+	</script>
+</head>
+<body>
+	<div class="list">
+		<ul>
+		    <li>这是一条新闻</li>
+		    <li>这是一条新闻</li>
+		    <li>这是一条新闻</li>
+		    <li>这是一条新闻</li>
+		    <li>这是一条新闻</li>
+		    <li>这是一条新闻</li>
+		<ul>
+	</div>
+	
+</body>
+</html>

@@ -1,0 +1,261 @@
+<html>
+	<title>遇见世界，发现美--Just Enjoy</title>
+	<style type="text/css">
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+		
+		body {
+			font-family: sans-serif;
+			overflow: hidden;
+		}
+		.main {
+			background : #DDD;
+			height : 100%;
+			overflow:auto;
+			overflow-x: hidden;
+		}
+		
+		/* ---- grid ---- */
+		
+		.grid {
+		  background: #DDD;
+		}
+		
+		/* clear fix */
+		.grid:after {
+		  content: '';
+		  display: block;
+		  clear: both;
+		}
+		
+		/* ---- .grid-item ---- */
+		
+		.grid-sizer,
+		.grid-item {
+		  width: 20%;
+		}
+		
+		.grid-item {
+		  float: left;
+		}
+		.grid:after {
+		  content: '';
+		  display: block;
+		  clear: both;
+		}		
+		.grid-item:before {
+		  counter-increment: grid-item;
+		 /*  content: counter(grid-item); */
+		  display: block;
+		  color: white;
+		  padding-top: 0.2em;
+		  text-align: center;
+		  font-size: 1.4rem;
+		}
+		.grid-item img {
+		  display: block;
+		  width: 100%;
+		}
+		#load_more {
+
+			
+		}
+		.footer {
+			text-align: center;
+			margin-top: 80px;
+			padding-bottom:50px;
+		}
+		.bottom {
+			text-align:center;
+			height: 50px;
+			background:#000;
+			padding-top:15px;
+		}
+		
+		.site_foot {
+			z-index:2
+		}
+		.bottom-footer {
+			background-color: rgba(0, 0, 0, .85);
+			height: 80px;
+		}
+		.bottom span {
+			font-size:10px;
+			color:white;
+		}
+		.float {
+			position:fixed;
+			right:20;
+			bottom:50px;
+		}
+		.float img {
+			height:50px;
+			cursor: pointer;
+		}
+		.folat a {
+			cursor: pointer;
+		}
+		
+	</style>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href='./node_modules/bootstrap/dist/css/bootstrap.min.css'>
+	<link rel="stylesheet" href='head.css'>
+	<script src='./node_modules/jquery/dist/jquery.min.js'></script> 
+	<script src='./node_modules/bootstrap/dist/js/bootstrap.min.js'></script> 
+	<script src='./node_modules/masonry-layout/dist/masonry.pkgd.js'></script> 
+	<script src='./node_modules/imagesloaded/imagesloaded.pkgd.js'></script> 
+	<script src='./node_modules/lazyload/lazyload.js'></script> 
+	<script>
+		var page = 1;
+		function getQueryVariable(variable)
+		{
+		       var query = window.location.search.substring(1);
+		       var vars = query.split("&");
+		       for (var i=0;i<vars.length;i++) {
+		               var pair = vars[i].split("=");
+		               if(pair[0] == variable){return pair[1];}
+		       }
+		       return(false);
+		}
+		//设置滚动条高度
+		function setScrollTop(num) {
+			(document.documentElement && document.documentElement.scrollTop) ? (document.documentElement.scrollTop = num) : (document.body.scrollTop = num);
+		}
+		$(function(){
+			main_height = document.body.clientHeight - $('.bottom').outerHeight() - $('nav').outerHeight()
+			$('.main').height(main_height + 'px')
+			
+			var cate = getQueryVariable('cate')
+			console.log(cate)
+			if (cate == false) {
+				cate = 1
+			}
+
+			get_data(cate, page, 0)
+			
+			$('#load_more').click(function() {
+				page = page + 1
+				console.log(page)
+				get_data(cate, page)
+			})
+			allow_scroll = true
+			$('.main').scroll(function() {
+				document_height = document.body.clientHeight 
+				document_height = $('.main')[0].scrollHeight
+				div_height = $('.main').height()
+				div_scroll = $('.main').scrollTop()
+
+				if(document_height - div_height - div_scroll <  50){
+					if (allow_scroll) {
+						allow_scroll = false
+						page = page + 1;
+						console.log(page)
+						get_data(cate, page, 0)
+					}
+				}
+			})
+		})
+		
+		function change() {
+			var cate = getQueryVariable('cate')
+			console.log(cate)
+			if (cate == false) {
+				cate = 1
+			}
+			get_data(cate, page, 1)
+		}	
+
+		function get_data(cate, page, rand) {
+			var url = "http://47.104.164.88/api/list/" +cate + '/' +  page + '/' + rand
+			$.ajax({
+				url: url,
+				method: "get",
+				data: {},
+				dataType: "json",
+				success: function(data) {
+					allow_scroll = true
+					page = data.page
+					dom = ''
+					style = ''
+					//$.each(data[0].my_url, function(i, v) {
+					//	dom += '<div class = "grid-item"><img src = "' + v + '"/></div>'
+					//})
+					$.each(data.list, function(i, v) {
+						//style = 'style= "width: ' + v.width + 'px;' + 'height:' + v.height + 'px;"'
+						height = $(document).width() * 0.2 * (v.height / v.width)
+						style = 'height=' + height + 'px'
+						dom += '<div class = "grid-item"><img '+ style + ' class="lazyload" src = "loading3.gif"  data-src = "' + v.my_url + '"/></div>'
+					})
+					
+					dom = $(dom)
+					var $grid = $('.grid').masonry({
+						itemSelector: '.grid-item',
+						horizontalOrder: false
+					})
+					if (rand == 1) {
+						$('.grid-item').remove('.grid-item')
+					}
+					$grid.masonry().append(dom).masonry('appended', dom).masonry()
+					$grid = $('.grid').masonry({
+						itemSelector: '.grid-item',
+						horizontalOrder: false
+					})
+
+					$grid.imagesLoaded().progress( function() {
+					}).done(function() {
+						$('.lazyload').lazyload()
+						$grid.masonry('layout')
+						$grid.masonry();
+						$grid.masonry('reloadItems')
+						$grid.masonry();
+					}) 
+				},
+				fail: function(data) {
+					alert('fali')
+				}
+			});
+		}
+	</script>
+	<body>
+		<nav class="site-header sticky-top py-1">
+			<div class="container d-flex flex-column flex-md-row justify-content-between">
+			    <a class="py-2" href="http://47.104.164.88">
+					<img src="just_enjoy4.png" style="width:108px"/>
+    		    </a>
+    		    <a class="py-2 d-none d-md-inline-block" href="http://47.104.164.88/index.html?cate=1">美女</a>
+    		    <a class="py-2 d-none d-md-inline-block" href="http://47.104.164.88/index.html?cate=2">汽车&生活</a>
+    		    <a class="py-2 d-none d-md-inline-block" href="http://47.104.164.88/index.html?cate=3">自然</a>
+    		    <a class="py-2 d-none d-md-inline-block" href="http://47.104.164.88/index.html?cate=4">表情包</a>
+    		    <a class="py-2 d-none d-md-inline-block" href="#">风景</a>
+    		    <a class="py-2 d-none d-md-inline-block" href="#">太空</a>
+    		    <a class="py-2 d-none d-md-inline-block" href="#">自驾</a>
+    	    </div>
+		</nav>
+		<div class='main'>
+			<div class="grid">
+			  <div class="grid-sizer"></div>
+			  <!--<div class="grid-item">
+			    <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/82/orange-tree.jpg" />
+			  </div>-->
+			</div>
+			<!-- <div class='footer'>
+				<input class="btn btn-primary" id="load_more" type="button" value="加载更多">
+			</div> -->
+		</div>
+		<div class="bottom">
+			<span>图片源自互联网，如有侵权请联系我们删除</span>
+		</div>
+		<div class="float">
+			<a title='换一批'  onclick='change()'> <img src="data:image/png;base64,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" /></a>
+		</div>
+		<!-- <div class="bottom-footer"></div> -->
+		<!-- <nav class="navbar fixed-bottom site-header site-foot">
+			<a class="navbar-brand" href="#">Fixed bottom</a>
+		</nav> -->
+	</body> 
+
+</html>
+	
