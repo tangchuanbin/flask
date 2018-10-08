@@ -1,0 +1,40 @@
+.grid {
+  background-color: #ffffff;
+}
+
+/* clear fix */
+.grid:after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+/* ---- .grid-item ---- */
+
+.grid-sizer,
+.grid-item {
+  width: 50%;
+  padding:5px;
+}
+
+.grid-item {
+  float: left;
+}
+.grid:after {
+  content: '';
+  display: block;
+  clear: both;
+}		
+.grid-item:before {
+  counter-increment: grid-item;
+ /*  content: counter(grid-item); */
+  display: block;
+  color: white;
+  padding-top: 0.2em;
+  text-align: center;
+  font-size: 1.4rem;
+}
+.grid-item img {
+  display: block;
+  width: 100%;
+}

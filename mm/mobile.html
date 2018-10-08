@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>斗图之家-专业表情包搜索</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+		<link rel="stylesheet" href="css/mui.min.css">
+		<link rel="stylesheet" href="css/mobile.css">
+		<style>
+			html,
+			body {
+				background-color: #efeff4;
+			}
+			.mui-bar .mui-pull-left .mui-icon {
+				padding-right: 5px;
+				font-size: 28px;
+			}
+			.mui-bar .mui-btn {
+				font-weight: normal;
+				font-size: 17px;
+			}
+			.mui-bar .mui-btn-link {
+				top: 1px;
+			}
+			#pullrefresh {
+				overflow:scroll;
+			}
+			.mui-search {
+				transition: all 0.75s;
+				transform: scale(0);
+			}
+			.mui-titleww {
+				transition: all 0.75s;
+				transform: scale(1);
+			}
+		</style>
+	</head>
+	<body>
+		<header id="header" class="mui-bar mui-bar-nav">
+			<h1  class="mui-title">斗图之家</h1>
+			<div class="mui-input-row mui-search">
+				<input type="search" class="mui-input-clear" placeholder="请输入关键词 ">
+			</div>
+		</header>
+		<nav class="mui-bar mui-bar-tab">
+			<a class="mui-tab-item mui-active" href="#tabbar">
+					<span class="mui-icon mui-icon-home"></span>
+				<span class="mui-tab-label">最新表情</span>
+			</a>
+			<a class="mui-tab-item" href="#tabbar-with-contact">
+				<span class="mui-icon mui-icon-search"></span>
+				<span class="mui-tab-label">表情搜素</span>
+			</a>
+		</nav>
+
+		<div id="pullrefresh" class="mui-content mui-scroll-wrapper">
+			<div class="grid">
+			  <div class="grid-sizer"></div>
+			</div>
+		</div>
+		<script src="js/mui.js"></script>
+		<script src='./node_modules/jquery/dist/jquery.min.js'></script> 
+		<script src='./node_modules/masonry-layout/dist/masonry.pkgd.js'></script> 
+		<script src='./node_modules/imagesloaded/imagesloaded.pkgd.js'></script> 
+		<script src='./node_modules/lazyload/lazyload.js'></script> 
+		<script type="text/javascript">
+			page = 1;
+			mui.init({
+				swipeBack:true, //启用右滑关闭功能
+				pullRefresh: {
+					container: '#pullrefresh',
+					//down: {
+					//	style:'circle',
+					//	callback: pulldownRefresh
+					//},
+					up: {
+						height:120,
+						auto :true,
+						contentrefresh: '正在加载...',
+						contentnomore:'no data',
+						callback: pulldownRefresh
+					}
+				}
+			});
+			
+			elem = document.getElementById('pullrefresh')
+			elem.addEventListener("swipeup",function () {
+				console.log("1");
+				$('.mui-search').css('transform', 'scale(1)')
+				$('.mui-title').css('transform', 'scale(0)')
+			});
+			elem.addEventListener("swipedown",function () {
+				console.log("2");
+				if ($('#pullrefresh').scrollTop() == 0) {
+					$('.mui-search').css('transform', 'scale(0)')
+					$('.mui-title').css('transform', 'scale(1)')
+				}
+			});
+			
+			function get_data(cate, page, rand) {
+				var key_word = $('#search').val()
+				var condition = {}
+				if (key_word != '') {
+					condition = {'key_word': key_word}
+				}
+				var url = "http://47.104.164.88/api/list/" +cate + '/' +  page + '/' + rand
+				$.ajax({
+					url: url,
+					method: "get",
+					data: condition,
+					dataType: "json",
+					success: function(data) {
+    					//var bottomElem = document.querySelector('.mui-pull-bottom-pocket');
+    					//if(!bottomElem.classList.contains('mui-visibility')) {
+    					//    bottomElem.classList.add('mui-visibility');
+						//}
+						allow_scroll = true
+						page = data.page
+						dom = ''
+						style = ''
+						//$.each(data[0].my_url, function(i, v) {
+						//	dom += '<div class = "grid-item"><img src = "' + v + '"/></div>'
+						//})
+						$.each(data.list, function(i, v) {
+							//style = 'style= "width: ' + v.width + 'px;' + 'height:' + v.height + 'px;"'
+							height = $(document).width() * 0.5 * (v.height / v.width)
+							style = 'height=' + height + 'px'
+							dom += '<div class = "grid-item"><img '+ style + ' class="lazyload" src = "loading3.gif"  data-src = "' + v.my_url + '"/></div>'
+						})
+						
+						dom = $(dom)
+						var $grid = $('.grid').masonry({
+							itemSelector: '.grid-item',
+							horizontalOrder: false
+						})
+						if (rand == 1 || (key_word != '' && page == 1)) {
+							$('.grid-item').remove('.grid-item')
+						}
+						$grid.masonry().append(dom).masonry('appended', dom).masonry()
+						$grid = $('.grid').masonry({
+							itemSelector: '.grid-item',
+							horizontalOrder: false
+						})
+
+						$grid.imagesLoaded().progress( function() {
+						}).done(function() {
+							$('.lazyload').lazyload()
+							$grid.masonry('layout')
+							$grid.masonry();
+							$grid.masonry('reloadItems')
+							$grid.masonry();
+						}) 
+					},
+					fail: function(data) {
+						alert('fali')
+					}
+				});
+			}
+			function pulldownRefresh() {
+				setTimeout(function() {
+					get_data(4, page, 0)
+					mui('#pullrefresh').pullRefresh().endPullupToRefresh(false);
+					page = page + 1;
+				}, 1500);
+			}
+		</script>
+	</body>
+</html>

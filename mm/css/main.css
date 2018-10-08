@@ -54,11 +54,12 @@ nav {
 .fixed {
 	position:fixed;
 	background-color:#ffffff;
-	/*width:100%; width设置100%为啥出去？*/
 	height:500px;
-	width:180px;
 	overflow:hidden;
 	top:100px;
+	width:180px;
+	/*padding:0px;
+	right:10px;*/
 }
 .right {
 	padding:0;

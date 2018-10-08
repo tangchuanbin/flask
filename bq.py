@@ -116,7 +116,7 @@ def get():
         'Cookie' : 'Hm_lvt_65e796f34b9ee7170192209a91520a9a=1538198207; Hm_lpvt_65e796f34b9ee7170192209a91520a9a=1538198207'
     }
     begin = 1
-    end = 1000
+    end = 5000
     while begin < end:
         begin = begin + 1
         url = 'http://www.bee-ji.com/data/search/json'
@@ -126,6 +126,7 @@ def get():
             condition = {}
             condition['bq_id'] = one['id']
             if bq.find_one(condition) is not None:
+                print(str(one['id']) + '已经存在')
                 continue
             print(one['desc'])
             one_bq['bq_id'] = one['id']

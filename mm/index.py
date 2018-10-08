@@ -57,8 +57,10 @@ def res():
     #hashcode = hashlib.sha1(list.encode('utf8')).hexdigest()
     #if hashcode == signature:
     #    print(request.values)
+    #    return echostr
     #else:
     #    return ""
+    #exit()
     print(request.get_data().decode('utf-8'))
     xml_str = request.get_data()
     if len(xml_str) == 0:
@@ -68,42 +70,51 @@ def res():
     FromUserName = xml_data.find('FromUserName').text
     CreateTime   = xml_data.find('CreateTime').text
     MsgType      = xml_data.find('MsgType').text
-    MsgId        = xml_data.find('MsgId').text
-    Content      = xml_data.find('Content').text
-
-    # 开始查询
-    condition = {}
-    key_word = Content
-    cate = 4
-    page = 1
-    rand = 0
-    if key_word != 0 and cate == 4:
-        rgx = re.compile('.*' + key_word + '.*', re.IGNORECASE)
-        condition = {"desc" :  rgx}
-    lists = []
-    select = {'name': 1, 'thumbnail': 1, 'my_url': 1, '_id': 0, 'width': 1, 'height': 1}
-    sort_field = 'rand'
-    sort_type  = -1
-    if page == 1:
-        limit = 10
+    #MsgId        = xml_data.find('MsgId').text
+    if MsgType == 'event':
+        Event        = xml_data.find('Event').text
+        if Event == 'subscribe':
+            text = "终于等到你，关注全网最新最全的斗图神器\r\n" + '你可以试着发送你想要搜素的关键词，我们公众号会随机给你推送十个图片链接，点击链接查看即可\r\n例如发送 熊本熊'
+            data = {'ToUserName': FromUserName, 'FromUserName' : ToUserName, 'Content': text}
+            res = wx.text_send(data)
+            print(res)
+            return res
+            exit()
     else:
-        limit = 10
-    if rand == 1:
-        limit = 20
-    lists = db.get_list(cate, select, condition, limit, page, sort_field, sort_type, rand)
-    if len(lists['list']) == 0:
-        text = '暂无该关键词的表情包,请重新换一个词。'
-    else:
-        text = "因为微信限制，个人公众号提供的上传图片空间有限，您可以点击如下链接选择需要的图片:\r\n"
-        i = 0
-        for one_list in lists['list']:
-            i = i + 1
-            text = text + str(i) + ':' + one_list['my_url'] + '\r\n'
+        Content      = xml_data.find('Content').text
+        # 开始查询
+        condition = {}
+        key_word = Content
+        cate = 4
+        page = 1
+        rand = 0
+        if key_word != 0 and cate == 4:
+            rgx = re.compile('.*' + key_word + '.*', re.IGNORECASE)
+            condition = {"desc" :  rgx}
+        lists = []
+        select = {'name': 1, 'thumbnail': 1, 'my_url': 1, '_id': 0, 'width': 1, 'height': 1}
+        sort_field = 'rand'
+        sort_type  = -1
+        if page == 1:
+            limit = 10
+        else:
+            limit = 10
+        if rand == 1:
+            limit = 20
+        lists = db.get_list(cate, select, condition, limit, page, sort_field, sort_type, rand)
+        if len(lists['list']) == 0:
+            text = '暂无该关键词的表情包,请重新换一个词。'
+        else:
+            text = "因为微信限制，个人公众号提供的上传图片空间有限，您可以点击如下链接选择需要的图片:\r\n"
+            i = 0
+            for one_list in lists['list']:
+                i = i + 1
+                text = text + str(i) + ':' + one_list['my_url'] + '\r\n'
 
-    data = {'ToUserName': FromUserName, 'FromUserName' : ToUserName, 'Content': text}
-    
-    if MsgType  == 'text':
-        res = wx.text_send(data)
-        print(res)
-        return res
-    return ''
+        data = {'ToUserName': FromUserName, 'FromUserName' : ToUserName, 'Content': text}
+        
+        if MsgType  == 'text':
+            res = wx.text_send(data)
+            print(res)
+            return res
+        return ''

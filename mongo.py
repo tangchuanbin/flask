@@ -21,5 +21,7 @@ one_mm = {
         'thumbnail': 'test',
         'images_detail': ['002.jpg', '009.jpg']
 }
-mm.insert(one_mm)
+#mm.insert(one_mm)
+res = mm.find_one({'thumbnail' : 'test'})
 
+print(res is  not None)
